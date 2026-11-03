@@ -40,3 +40,16 @@ test("parseSchedule keeps valid matches, sorted by hour, and drops bad channel p
   assert.equal(out[1].title, "Barcelona vs. Aston Villa");
   assert.deepEqual(parseSchedule("not a list"), []);
 });
+
+test("every id the plugin hands out is one Kino accepts", async () => {
+  const ok = /^[A-Za-z0-9._~-]{1,128}$/;
+  const schedule = [{ hora_utc: new Date(Date.now() + 3600e3).toISOString(), liga: "Liga: Ñandú Ç", equipos: "Peñarol vs. Fénix", canales: [{ nombre: "ESPN 2 HD", url: "/ver/espn2.php", calidad: "720p" }] }];
+  globalThis.kino = { lang: "es", fetch: async () => ({ ok: true, json: () => schedule }), error: (c, m) => new Error(c + m) };
+  const { liveCategories, liveChannels } = await import("../plugin.js");
+  const cats = await liveCategories();
+  assert.ok(cats.length >= 2 && cats.every((c) => ok.test(c.id)), JSON.stringify(cats));
+  for (const c of cats) {
+    const { items } = await liveChannels({ categoryId: c.id });
+    assert.ok(items.length > 0 && items.every((i) => ok.test(i.id)), c.id);
+  }
+});

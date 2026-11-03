@@ -6,6 +6,8 @@ const HOST = "https://elcanaldeportivo.org";
 const PLAYER_HOST = "xstream.st";
 const MAX_FRAMES = 3; // pages followed from a channel page to its player
 const TODAY_ID = "today";
+const ON_AIR_MS = 3 * 60 * 60 * 1000; // a match that started up to 3 hours ago is still on air
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const TEXTS = {
   es: {
@@ -87,6 +89,11 @@ function slug(s) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+// Kino accepts ids of letters, digits and . _ ~ - only.
+function leagueId(league) {
+  return "l_" + slug(league).slice(0, 60);
+}
+
 function clock(utc) {
   const d = new Date(utc);
   const p = (n) => String(n).padStart(2, "0");
@@ -95,7 +102,7 @@ function clock(utc) {
 
 function channelsOf(match, categoryId) {
   return match.channels.map((c) => ({
-    id: match.utc + ":" + slug(match.title) + ":" + slug(c.name),
+    id: (match.utc + "_" + slug(match.title).slice(0, 60) + "_" + slug(c.name).slice(0, 30)).slice(0, 120),
     title: match.title + " · " + c.name + (c.quality ? " (" + c.quality + ")" : "") + " · " + clock(match.utc),
     ref: c.path,
     categoryId,
@@ -109,12 +116,13 @@ export async function home() {
 export async function liveCategories() {
   const matches = await schedule();
   const leagues = [...new Set(matches.map((m) => m.league))];
-  return [{ id: TODAY_ID, title: t("today"), genre: "deportes" }, ...leagues.map((l) => ({ id: "l:" + slug(l), title: l, genre: "deportes" }))];
+  return [{ id: TODAY_ID, title: t("today"), genre: "deportes" }, ...leagues.map((l) => ({ id: leagueId(l), title: l, genre: "deportes" }))];
 }
 
 export async function liveChannels({ categoryId }) {
   const matches = await schedule();
-  const picked = categoryId === TODAY_ID ? matches : matches.filter((m) => "l:" + slug(m.league) === categoryId);
+  const now = Date.now();
+  const picked = categoryId === TODAY_ID ? matches.filter((m) => m.utc > now - ON_AIR_MS && m.utc < now + DAY_MS) : matches.filter((m) => leagueId(m.league) === categoryId);
   return { items: picked.flatMap((m) => channelsOf(m, categoryId)).slice(0, 200) };
 }
 
