@@ -53,3 +53,12 @@ test("every id the plugin hands out is one Kino accepts", async () => {
     assert.ok(items.length > 0 && items.every((i) => ok.test(i.id)), c.id);
   }
 });
+
+test("a match carries its league logo from the site, and only a safe path", () => {
+  const [a, b] = parseSchedule([
+    { hora_utc: "2026-11-03T20:00:00Z", logo: "img/cha.png", equipos: "A vs. B", canales: [{ nombre: "X", url: "/ver/x.php" }] },
+    { hora_utc: "2026-11-03T21:00:00Z", logo: "https://evil.example/x.png", equipos: "C vs. D", canales: [{ nombre: "X", url: "/ver/x.php" }] },
+  ]);
+  assert.equal(a.logo, "https://elcanaldeportivo.org/img/cha.png");
+  assert.equal(b.logo, "");
+});

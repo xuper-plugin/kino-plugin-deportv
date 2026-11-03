@@ -60,7 +60,7 @@ export function streamUrlOf(script) {
   return /^https:\/\//.test(url) ? url : null;
 }
 
-/** Matches of the schedule as { league, title, utc, channels: [{ name, path, quality }] }; the hour as epoch ms. */
+/** Matches of the schedule as { league, title, utc, logo, channels: [{ name, path, quality }] }; the hour as epoch ms. */
 export function parseSchedule(list) {
   const out = [];
   for (const m of Array.isArray(list) ? list : []) {
@@ -73,6 +73,7 @@ export function parseSchedule(list) {
       league: String(m.liga || "").replace(/:\s*$/, "").trim() || "Otros",
       title: m.equipos.replace(/\s+/g, " ").trim().slice(0, 120),
       utc: Date.parse(m.hora_utc) || 0,
+      logo: /^img\/[\w.-]+$/.test(m.logo || "") ? HOST + "/" + m.logo : "",
       channels,
     });
   }
@@ -106,6 +107,7 @@ function channelsOf(match, categoryId) {
     title: match.title + " · " + c.name + (c.quality ? " (" + c.quality + ")" : "") + " · " + clock(match.utc),
     ref: c.path,
     categoryId,
+    ...(match.logo ? { logo: match.logo } : {}),
   }));
 }
 
