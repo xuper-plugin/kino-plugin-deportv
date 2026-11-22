@@ -1,9 +1,11 @@
 // DeporTV: live matches from the El Canal Deportivo schedule, as channels in Kino's En vivo tab, grouped by league.
 // The schedule is a JSON list (hour, league, teams, channels). A channel's page holds an iframe chain that ends in a
-// player page; the player page lists its stream in a script. Only the xstream.st player is understood so far.
+// player page; the player page lists its stream in a script. Only the siempreon.shop player is understood so far.
+// (The site moved its player from xstream.st to siempreon.shop in Nov 2026; both expose the same streamUrls=[…] list,
+//  ending in an .m3u8 on candyshop.st.)
 
 const HOST = "https://elcanaldeportivo.org";
-const PLAYER_HOST = "xstream.st";
+const PLAYER_HOST = "siempreon.shop";
 const MAX_FRAMES = 3; // pages followed from a channel page to its player
 const TODAY_ID = "today";
 const ON_AIR_MS = 3 * 60 * 60 * 1000; // a match that started up to 3 hours ago is still on air
