@@ -1,7 +1,7 @@
 {
   "id": "deportv",
   "name": "DeporTV",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "apiVersion": 9,
   "entry": "plugin.js",
   "description": "Partidos de fútbol y otros deportes en vivo, agrupados por liga, desde la agenda de El Canal Deportivo.",
@@ -17,6 +17,7 @@
     "channels"
   ],
   "liveStreamHosts": "any",
+  "streamHosts": "any",
   "categories": [
     "live"
   ],
